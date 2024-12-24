@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  ProcessLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: ./target/lambda/release/
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          HANDLER_TYPE: process
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /process
+            Method: post
+
+  HealthLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: ./target/lambda/release/
+      Timeout: 5
+      MemorySize: 128
+      Environment:
+        Variables:
+          HANDLER_TYPE: health
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+
+  StatusLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: ./target/lambda/release/
+      Timeout: 5
+      MemorySize: 128
+      Environment:
+        Variables:
+          HANDLER_TYPE: status
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /status
+            Method: get
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    Description: OpenAI API Key
