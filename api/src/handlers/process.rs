@@ -3,7 +3,7 @@ use openai_api_rust::*;
 use openai_api_rust::chat::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct RequestPayload {
     pub message: String,
 }
@@ -13,18 +13,58 @@ pub struct ResponsePayload {
     pub response: String,
 }
 
-pub async fn handle(event: LambdaEvent<RequestPayload>) -> Result<ResponsePayload, Error> {
-    let payload = event.payload;
+#[derive(Deserialize, Debug)]
+pub struct ApiGatewayPayload {
+    pub body: String,
+}
 
-    // Check if the message is empty
+#[derive(Serialize, Debug, Default)]
+pub struct ApiGatewayResponse {
+    pub statusCode: i32,
+    pub body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+}
+
+
+pub async fn handle(
+    event: LambdaEvent<ApiGatewayPayload>,
+) -> Result<ApiGatewayResponse, Error> {
+    eprintln!("Raw API Gateway event: {:?}", event);
+
+    let payload: RequestPayload = serde_json::from_str(&event.payload.body)
+        .map_err(|e| format!("Failed to parse body: {}", e))?;
+
+    eprintln!("Parsed body: {:?}", payload);
+
     if payload.message.trim().is_empty() {
-        return Ok(ResponsePayload {
-            response: "The message payload is empty. Please provide a valid input".to_string(),
+        eprintln!("Error: Empty payload received.");
+        return Ok(ApiGatewayResponse {
+            statusCode: 400,
+            body: Some("Message payload is empty.".to_string()),
+            ..Default::default()
         });
     }
 
-    let auth = Auth::from_env().unwrap();
+    eprintln!("Payload message: {}", payload.message);
+
+    let auth = match Auth::from_env() {
+        Ok(auth) => {
+            eprintln!("Successfully retrieved OpenAI API key.");
+            auth
+        }
+        Err(e) => {
+            eprintln!("Error retrieving OpenAI API key: {:?}", e);
+            return Ok(ApiGatewayResponse {
+                statusCode: 500,
+                body: Some("Failed to retrieve OpenAI API key.".to_string()),
+                ..Default::default()
+            });
+        }
+    };
+
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
+    eprintln!("Initialized OpenAI client.");
 
     let messages = vec![
         Message {
@@ -33,9 +73,11 @@ pub async fn handle(event: LambdaEvent<RequestPayload>) -> Result<ResponsePayloa
         },
         Message {
             role: Role::User,
-            content: payload.message,
+            content: payload.message.clone(),
         },
     ];
+
+    eprintln!("Constructed OpenAI chat messages: {:?}", messages);
 
     let body = ChatBody {
         model: "gpt-3.5-turbo".to_string(),
@@ -52,23 +94,43 @@ pub async fn handle(event: LambdaEvent<RequestPayload>) -> Result<ResponsePayloa
         messages,
     };
 
-    let rs = openai.chat_completion_create(&body);
-    let choice = rs.unwrap().choices;
-    let message_content = choice[0]
+    eprintln!("Constructed OpenAI request body: {:?}", body);
+
+    let response = match openai.chat_completion_create(&body) {
+        Ok(response) => response,
+        Err(e) => {
+            eprintln!("Error in OpenAI API call: {:?}", e);
+            return Ok(ApiGatewayResponse {
+                statusCode: 500,
+                body: Some("Failed to call OpenAI API.".to_string()),
+                ..Default::default()
+            });
+        }
+    };
+
+    eprintln!("Received OpenAI API response: {:?}", response);
+
+    let message_content = response.choices[0]
         .message
         .as_ref()
         .unwrap()
         .content
         .clone();
 
+    eprintln!("Parsed response message: {}", message_content);
 
-    Ok(ResponsePayload { response: message_content })
+    Ok(ApiGatewayResponse {
+        statusCode: 200,
+        body: Some(message_content),
+        ..Default::default()
+    })
 }
+
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lambda_runtime::Context;
+    use lambda_runtime::{Context, LambdaEvent};
     use crate::handlers::process;
 
     #[tokio::test]
@@ -76,19 +138,24 @@ mod tests {
         dotenv::dotenv().ok(); // Load environment variables from .env
 
         // Simulate a Lambda event payload
-        let payload = RequestPayload {
-            message: "Test message".to_string(),
+        let payload = ApiGatewayPayload {
+            body: serde_json::to_string(&RequestPayload {
+                message: "Test message".to_string(),
+            })
+                .unwrap(),
         };
 
         // Simulate a Lambda context
         let context = Context::default();
 
-        // Mock OpenAI API response
-        let auth = Auth::from_env().unwrap();
-        let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
+        // Simulate the Lambda event
+        let event = LambdaEvent {
+            payload,
+            context,
+        };
 
-        // Simulate the response
-        let result = process::handle(LambdaEvent { payload, context }).await;
+        // Call the handler
+        let result = process::handle(event).await;
 
         // Assert the result is Ok
         assert!(result.is_ok());
@@ -98,29 +165,49 @@ mod tests {
         // Log the response
         println!("Response: {:?}", response);
 
-        assert!(!response.response.is_empty());
+        // Check the body of the response
+        assert!(response.body.is_some());
+        assert!(!response.body.unwrap().is_empty());
     }
 
     #[tokio::test]
     async fn test_handle_empty_message() {
         dotenv::dotenv().ok(); // Load environment variables from .env
 
-        let payload = RequestPayload {
-            message: "".to_string(),
+        // Simulate a Lambda event payload with an empty message
+        let payload = ApiGatewayPayload {
+            body: serde_json::to_string(&RequestPayload {
+                message: "".to_string(),
+            })
+                .unwrap(),
         };
 
         let context = Context::default();
 
-        let result = process::handle(LambdaEvent { payload, context }).await;
+        // Simulate the Lambda event
+        let event = LambdaEvent {
+            payload,
+            context,
+        };
 
-        // Check for a valid response
+        // Call the handler
+        let result = process::handle(event).await;
+
+        // Assert the result is Ok
         assert!(result.is_ok());
-        let response = result.unwrap();
 
+        // Validate the response content
+        let response = result.unwrap();
         // Log the response
         println!("Response: {:?}", response);
 
-        assert!(response.response.contains("The message payload is empty. Please provide a valid input"));
+        // Check the body of the response
+        assert!(response.body.is_some());
+        assert!(response
+            .body
+            .unwrap()
+            .contains("Message payload is empty."));
     }
 }
+
 

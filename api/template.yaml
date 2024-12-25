@@ -1,18 +1,21 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+
 Resources:
   ProcessLambda:
     Type: AWS::Serverless::Function
     Properties:
       Handler: bootstrap
       Runtime: provided.al2
-      CodeUri: ./target/lambda/release/
+      CodeUri: ./target/x86_64-unknown-linux-musl/release
       Timeout: 10
       MemorySize: 128
       Environment:
         Variables:
           HANDLER_TYPE: process
           OPENAI_API_KEY: !Ref OpenAIApiKey
+      Policies:
+        - AWSLambdaBasicExecutionRole
       Events:
         ApiEvent:
           Type: Api
@@ -25,12 +28,14 @@ Resources:
     Properties:
       Handler: bootstrap
       Runtime: provided.al2
-      CodeUri: ./target/lambda/release/
+      CodeUri: ./target/x86_64-unknown-linux-musl/release
       Timeout: 5
       MemorySize: 128
       Environment:
         Variables:
           HANDLER_TYPE: health
+      Policies:
+        - AWSLambdaBasicExecutionRole
       Events:
         ApiEvent:
           Type: Api
@@ -43,12 +48,14 @@ Resources:
     Properties:
       Handler: bootstrap
       Runtime: provided.al2
-      CodeUri: ./target/lambda/release/
+      CodeUri: ./target/x86_64-unknown-linux-musl/release
       Timeout: 5
       MemorySize: 128
       Environment:
         Variables:
           HANDLER_TYPE: status
+      Policies:
+        - AWSLambdaBasicExecutionRole
       Events:
         ApiEvent:
           Type: Api

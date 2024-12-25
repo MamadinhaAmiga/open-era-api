@@ -1,7 +1,11 @@
 [package]
-name = "api"
+name = "open-era-api" # This can remain as the name of your package.
 version = "0.1.0"
 edition = "2021"
+
+[[bin]]
+name = "bootstrap" # Ensure the binary is named bootstrap.
+path = "src/main.rs" # Specify the path to your main.rs file.
 
 [dependencies]
 lambda_runtime = "0.13.0"
@@ -13,5 +17,16 @@ openai_api_rust = "0.1.9"
 
 [dev-dependencies]
 dotenv = "0.15"
+
+[build]
+target = "x86_64-unknown-linux-musl"
+
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-linux-musl-gcc"
+rustflags = [
+    "-C", "link-arg=-static",
+    "-C", "link-arg=-fuse-ld=lld",
+]
+
 
 

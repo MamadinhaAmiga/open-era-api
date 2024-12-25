@@ -5,7 +5,8 @@ use handlers::{health, process, status};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().ok(); // Load .env file once
+    println!("Environment loaded!");
 
     let handler_type = std::env::var("HANDLER_TYPE").unwrap_or_else(|_| "health".to_string());
 
