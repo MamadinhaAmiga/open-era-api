@@ -23,6 +23,25 @@ Resources:
             Path: /process
             Method: post
 
+  TokenInfoLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: ./target/x86_64-unknown-linux-musl/release/
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          HANDLER_TYPE: tokeninfo
+          DEXTOOLS_API_KEY: "PLACEHOLDER"
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /tokeninfo
+            Method: get
+
   HealthLambda:
     Type: AWS::Serverless::Function
     Properties:

@@ -1,7 +1,7 @@
 use lambda_runtime::{service_fn, Error};
 
-mod handlers;
-use handlers::{health, process, status};
+// mod handlers;
+use open_era_api::handlers::{health, process, status, token_info};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -13,6 +13,10 @@ async fn main() -> Result<(), Error> {
     match handler_type.as_str() {
         "process" => {
             let func = service_fn(process::handle);
+            lambda_runtime::run(func).await?;
+        }
+        "tokeninfo" => {
+            let func = service_fn(token_info::handle);
             lambda_runtime::run(func).await?;
         }
         "status" => {
