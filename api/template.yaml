@@ -35,6 +35,7 @@ Resources:
         Variables:
           HANDLER_TYPE: tokeninfo
           DEXTOOLS_API_KEY: "PLACEHOLDER"
+          OPENAI_API_KEY: "PLACEHOLDER"
       Events:
         ApiEvent:
           Type: Api

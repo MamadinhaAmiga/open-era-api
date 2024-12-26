@@ -5,6 +5,18 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TokenPrice {
     pub price: f64,
+    #[serde(default = "default_variation")]
+    pub variation5m: f64,
+    #[serde(default = "default_variation")]
+    pub variation1h: f64,
+    #[serde(default = "default_variation")]
+    pub variation6h: f64,
+    #[serde(default = "default_variation")]
+    pub variation24h: f64,
+}
+
+fn default_variation() -> f64 {
+    0.0
 }
 
 pub async fn fetch_token_price(chain: &str, address: &str) -> Result<Option<TokenPrice>, String> {
