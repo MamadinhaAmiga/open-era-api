@@ -1,6 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+Globals:
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type,authorization'"
+      AllowOrigin: "'*'"
+      AllowCredentials: "'*'"
+
 Resources:
   ProcessLambda:
     Type: AWS::Serverless::Function
@@ -40,8 +48,9 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /tokeninfo
-            Method: get
+#            Path: /tokeninfo
+            Path: "/{proxy+}"
+            Method: ANY
 
   HealthLambda:
     Type: AWS::Serverless::Function

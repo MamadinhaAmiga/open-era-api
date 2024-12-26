@@ -16,6 +16,14 @@ Cargo.lock
 .env
 .idea/
 
+.aws-sam/
+bootstrap
+lambda.zip
+template.yaml.bak
+samconfig.toml
+env.json
+env.*
+
 # RustRover
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
