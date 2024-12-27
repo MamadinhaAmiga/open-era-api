@@ -19,12 +19,12 @@ pub async fn analyze_token_details(
 ) -> Result<AnalysisResponse, String> {
     let auth = match Auth::from_env() {
         Ok(auth) => {
-            eprintln!("Successfully retrieved OpenAI API key.");
+            eprintln!("Successfully retrieved API key.");
             auth
         }
         Err(e) => {
-            eprintln!("Error retrieving OpenAI API key: {:?}", e);
-            return Err("Failed to retrieve OpenAI API key.".to_string());
+            eprintln!("Error retrieving API key: {:?}", e);
+            return Err("Failed to retrieve API key.".to_string());
         }
     };
 
@@ -53,7 +53,7 @@ pub async fn analyze_token_details(
     );
 
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
-    eprintln!("Initialized OpenAI client.");
+    eprintln!("Initialized client.");
 
     let messages = vec![
         Message {
@@ -84,7 +84,7 @@ pub async fn analyze_token_details(
     let response = match openai.chat_completion_create(&body) {
         Ok(response) => response,
         Err(e) => {
-            eprintln!("Error in OpenAI API call: {:?}", e);
+            eprintln!("Error in API call: {:?}", e);
             return Err("Failed to analize token data on LLM".to_string());
         }
     };

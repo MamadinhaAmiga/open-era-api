@@ -13,7 +13,7 @@ struct TtsRequest {
 pub async fn text_to_speech_with_openai(text: &str) -> Result<(String, String), String> {
     let api_url = "https://api.openai.com/v1/audio/speech";
 
-    // Get the OpenAI API key from the environment
+    // Get the API key from the environment
     let api_key = env::var("OPENAI_API_KEY")
         .map_err(|_| "OPENAI_API_KEY environment variable not set".to_string())?;
 
@@ -24,7 +24,7 @@ pub async fn text_to_speech_with_openai(text: &str) -> Result<(String, String), 
         voice: "nova".to_string(),
     };
 
-    // Send the request to OpenAI TTS API
+    // Send the request to TTS API
     let client = Client::new();
     let response = client
         .post(api_url)
@@ -33,11 +33,11 @@ pub async fn text_to_speech_with_openai(text: &str) -> Result<(String, String), 
         .json(&request_body)
         .send()
         .await
-        .map_err(|e| format!("Failed to send request to OpenAI TTS API: {:?}", e))?;
+        .map_err(|e| format!("Failed to send request to TTS API: {:?}", e))?;
 
     if !response.status().is_success() {
         return Err(format!(
-            "OpenAI TTS API returned an error: {}",
+            "TTS API returned an error: {}",
             response.status()
         ));
     }
@@ -45,7 +45,7 @@ pub async fn text_to_speech_with_openai(text: &str) -> Result<(String, String), 
     // Get the raw audio bytes
     let audio_bytes = response.bytes().await.map_err(|e| {
         format!(
-            "Failed to read audio data from OpenAI Text To Speech Model API response: {:?}",
+            "Failed to read audio data from Text To Speech Model API response: {:?}",
             e
         )
     })?;

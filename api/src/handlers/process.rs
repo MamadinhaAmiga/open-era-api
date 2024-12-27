@@ -50,14 +50,14 @@ pub async fn handle(
 
     let auth = match Auth::from_env() {
         Ok(auth) => {
-            eprintln!("Successfully retrieved OpenAI API key.");
+            eprintln!("Successfully retrieved API key.");
             auth
         }
         Err(e) => {
-            eprintln!("Error retrieving OpenAI API key: {:?}", e);
+            eprintln!("Error retrieving API key: {:?}", e);
             return Ok(ApiGatewayResponse {
                 statusCode: 500,
-                body: Some("Failed to retrieve OpenAI API key.".to_string()),
+                body: Some("Failed to retrieve API key.".to_string()),
                 ..Default::default()
             });
         }
@@ -76,8 +76,6 @@ pub async fn handle(
             content: payload.message.clone(),
         },
     ];
-
-    eprintln!("Constructed OpenAI chat messages: {:?}", messages);
 
     let body = ChatBody {
         model: "gpt-3.5-turbo".to_string(),

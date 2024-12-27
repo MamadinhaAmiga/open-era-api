@@ -42,13 +42,12 @@ Resources:
       Environment:
         Variables:
           HANDLER_TYPE: tokeninfo
-          DEXTOOLS_API_KEY: "PLACEHOLDER"
-          OPENAI_API_KEY: "PLACEHOLDER"
+          DEXTOOLS_API_KEY: !Ref DexToolsApiKey
+          OPENAI_API_KEY: !Ref OpenAIApiKey
       Events:
         ApiEvent:
           Type: Api
           Properties:
-#            Path: /tokeninfo
             Path: "/{proxy+}"
             Method: ANY
 
@@ -96,3 +95,6 @@ Parameters:
   OpenAIApiKey:
     Type: String
     Description: OpenAI API Key
+  DexToolsApiKey:
+    Type: String
+    Description: DexTools API Key
