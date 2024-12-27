@@ -1,13 +1,22 @@
-use openai_api_rust::*;
-use openai_api_rust::chat::*;
-use serde::{Deserialize, Serialize};
 use crate::services::token::audit::TokenAudit;
 use crate::services::token::price::TokenPrice;
+use openai_api_rust::chat::*;
+use openai_api_rust::*;
+use openai_api_rust::audio::AudioApi;
+use serde::{Serialize};
+use crate::services::agent::text_to_speech::text_to_speech_with_openai;
+
+#[derive(Serialize)]
+pub struct AnalysisResponse {
+    pub text: String,
+    pub audio_base64: String,
+    pub audio_id: String,
+}
 
 pub async fn analyze_token_details(
     audit: Option<TokenAudit>,
     price: Option<TokenPrice>,
-) -> Result<String, String> {
+) -> Result<AnalysisResponse, String> {
     let auth = match Auth::from_env() {
         Ok(auth) => {
             eprintln!("Successfully retrieved OpenAI API key.");
@@ -15,7 +24,7 @@ pub async fn analyze_token_details(
         }
         Err(e) => {
             eprintln!("Error retrieving OpenAI API key: {:?}", e);
-            return Ok(String::new());
+            return Err("Failed to retrieve OpenAI API key.".to_string());
         }
     };
 
@@ -39,7 +48,7 @@ pub async fn analyze_token_details(
 
     // Define the prompt for OpenAI completion
     let prompt = format!(
-        "Analyze the following Solana token details:\n{}\nProvide a short but precise analysis with trade recomendations, you should take into account specially the price variation and from it, recommend a trade action (buy/hold/sell/long/short) its ok to not be sure, just give an action recommendation based on price variation and updatedAt (which means when it was created). if proxy, blacklist and fees are unknown, discard it. ignore contract renounced as well. if its not flagged as scam, say it is not a scam.",
+        "Knowing that you inherited this data {} ignore Proxy Status, Blacklist, Sell/Buy Taxes and Contract Renounced.\n Please analyse it and Provide a short analysis with telling if its a good trade or not. Use emojis to make it look nice please. Provide a recommendation in the end. Also start the response with a trading action but emoji styled",
         analysis_data
     );
 
@@ -49,7 +58,7 @@ pub async fn analyze_token_details(
     let messages = vec![
         Message {
             role: Role::System,
-            content: "You are a helpful Solana GPT New/Meme Token Trader assistant. Your goal is to provide a fast and sweet analyze from token details and trade recommendations like buy/hold/short/long/sell.".to_string(),
+            content: "You are a helpful Solana GPT New/Meme Token Trader assistant that. Every data you receive, you should pretend that you already know, so you talk about the data like you are providing it. Your goal is to provide a fast and sweet analyze from token details and trade recommendations like buy/hold/short/long/sell.".to_string(),
         },
         Message {
             role: Role::User,
@@ -60,8 +69,8 @@ pub async fn analyze_token_details(
     let body = ChatBody {
         model: "gpt-4o".to_string(),
         max_tokens: Some(1250),
-        temperature: Some(0.7_f32),        // Slight randomness.
-        top_p: Some(1.0_f32),              // Use all probable tokens.
+        temperature: Some(0.3_f32), // Slight randomness.
+        top_p: Some(0.9_f32),       // Use all probable tokens.
         n: Some(1),
         stream: Some(false),
         stop: None,
@@ -76,7 +85,7 @@ pub async fn analyze_token_details(
         Ok(response) => response,
         Err(e) => {
             eprintln!("Error in OpenAI API call: {:?}", e);
-            return Ok(String::new());
+            return Err("Failed to analize token data on LLM".to_string());
         }
     };
 
@@ -87,5 +96,13 @@ pub async fn analyze_token_details(
         .content
         .clone();
 
-    Ok(message_content)
+    let audio_content = text_to_speech_with_openai(&message_content.clone()).await?;
+
+    Ok(AnalysisResponse {
+        text: message_content,
+        // todo: temp returning empty audios
+        audio_base64: audio_content.0,
+        audio_id: audio_content.1,
+    })
+    // Ok(message_content)
 }

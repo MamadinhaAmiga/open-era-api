@@ -37,7 +37,7 @@ Resources:
       Handler: bootstrap
       Runtime: provided.al2
       CodeUri: ./target/x86_64-unknown-linux-musl/release/
-      Timeout: 10
+      Timeout: 30
       MemorySize: 128
       Environment:
         Variables:
