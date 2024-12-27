@@ -1,15 +1,15 @@
-# **Open-Era API 🚀**
+# **Palms-Open API 🚀**
 
-The **Open-Era API** is a cutting-edge Rust-based open-source API designed to revolutionize how traders and developers interact with token information. By harnessing the power of **Large Language Models (LLMs)** and **Machine Learning**, the Open-Era API delivers unparalleled insights, enabling precise token analysis and robust decision-making for Solana traders and developers worldwide.
+The **Palms-Open API** is a cutting-edge Rust-based open-source API designed to revolutionize how traders and developers interact with token information. By harnessing the power of **Large Language Models (LLMs)** and **Machine Learning**, the Palms-Open API delivers unparalleled insights, enabling precise token analysis and robust decision-making for Solana traders and developers worldwide.
 
-## **Why Open-Era API?**
+## **Why Palms-Open API?**
 
 - **LLM-Powered Analysis**: Advanced language models take token analysis to a whole new level, providing sophisticated insights beyond traditional metrics.
 - **Machine Learning Integration**: Stay ahead of market trends with real-time predictions powered by ML algorithms tuned for the dynamic nature of cryptocurrency markets.
 - **Rust Performance**: Built in Rust for unparalleled performance, security, and scalability.
 - **Decentralized Ready**: Designed to seamlessly integrate into decentralized environments and empower autonomous trading systems.
 
-The **Open-Era API** isn’t just an API—it’s the future of token intelligence.
+The **Palms-Open API** isn’t just an API—it’s the future of token intelligence.
 
 ---
 
@@ -24,12 +24,12 @@ The **Open-Era API** isn’t just an API—it’s the future of token intelligen
 
 ## **Build Instructions**
 
-Follow these steps to set up the **Open-Era API** locally:
+Follow these steps to set up the **Palms-Open API** locally:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-org/open-era-api.git
-   cd open-era-api
+   git clone https://github.com/your-org/palms-open-api.git
+   cd palms-open-api
    ```
 
 2. **Install Rust**:
@@ -86,7 +86,7 @@ Expand support beyond Solana to include Ethereum, Polygon, and other leading cha
 Deploy the API in a fully decentralized manner, enabling trustless and unstoppable token analysis solutions.
 
 ### 🌐 **Phase 4: Ecosystem Expansion**
-Integrate Open-Era API with trading platforms, bots, and decentralized applications (DApps) for maximum adoption.
+Integrate Palms-Open API with trading platforms, bots, and decentralized applications (DApps) for maximum adoption.
 
 ---
 
