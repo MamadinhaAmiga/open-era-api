@@ -43,8 +43,9 @@ Follow these steps to set up the **Open-Era API** locally:
 3. **Install Dependencies**:
    Use `cargo` to fetch and install dependencies:
    ```bash
-   cargo build
+   cargo build --release --target=x86_64-unknown-linux-musl
    ```
+   --release and --target flag is needed to build binary accordingly to lambdas environment 
 
 4. **Run Tests**:
    Verify the setup by running tests:
@@ -59,14 +60,16 @@ Follow these steps to set up the **Open-Era API** locally:
 1. **Start the API**:
    ```bash
    cargo run --release
+   or
+   sam local start-api --env-vars env.json
    ```
 
 2. **Access the API**:
-   By default, the API runs on `http://localhost:8000`. You can interact with the endpoints using tools like `curl`, Postman, or your favorite HTTP client.
+   By default, the API runs on `http://127.0.0.1:3000`. You can interact with the endpoints using tools like `curl`, Postman, or connect your webapp.
 
 3. **Example Request**:
    ```bash
-   curl -X GET http://localhost:8000/token-info?symbol=SOL
+   curl -X GET http://127.0.0.1:3000/tokeninfo?token_id=HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC
    ```
 
 ---
