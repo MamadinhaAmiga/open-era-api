@@ -29,7 +29,7 @@ pub async fn fetch_token_audit(chain: &str, address: &str) -> Result<Option<Toke
     let api_key = env::var("DEXTOOLS_API_KEY")
         .map_err(|_| "API key not found in environment variables.".to_string())?;
 
-    let url = format!("https://public-api.dextools.io/trial/v2/token/{}/{}/audit", chain, address);
+    let url = format!("https://public-api.dextools.io/standard/v2/token/{}/{}/audit", chain, address);
     let client = Client::new();
 
     // Send the HTTP request

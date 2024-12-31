@@ -85,7 +85,7 @@ pub async fn handle(event: LambdaEvent<ApiGatewayPayload>) -> Result<ApiGatewayR
             }
 
             // Analyze the token details
-            match analyze_token_details(details.audit, details.price).await {
+            match analyze_token_details(details.audit, details.price, token_id).await {
                 Ok(analysis_result) => {
                     // todo: add separate audio transcript
                     // Serialize the `AnalysisResponse` to JSON
